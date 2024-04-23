@@ -1,0 +1,13 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+  
+### VS Code ###
+.vscode/
+
+### Resources ###
+src/main/resources/pem
+src/main/resources/application.properties
