@@ -38,8 +38,10 @@ public class UserDetailController {
     }
 
     @PutMapping("update/user/status/{status}")
-    public void disableUser(@PathVariable Integer id, @PathVariable UserStatus status) {
-        userDetailService.updateStatus(id, status);
+    public UserBasicDetailModel disableUser(@PathVariable UserStatus status, HttpServletRequest httpServletRequest) {
+        final UserBasicDetailModel userBasicDetailModel = (UserBasicDetailModel) httpServletRequest
+                .getAttribute(AuthConstant.CONTEXT_USER);
+        return userDetailService.updateStatus(userBasicDetailModel.getId(), status);
     }
 
 }

@@ -21,7 +21,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody AuthenticationRequestModel model) {
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest model) {
         final TokenPair tokenPair = authService.authenticate(model);
         final ResponseCookie responseCookie = ResponseCookie
                 .from(AuthConstant.REFRESH_TOKEN_PREFIX, tokenPair.getRefreshToken())
@@ -29,15 +29,16 @@ public class AuthController {
                 .secure(AuthConstant.IS_SECURE).build();
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(tokenPair.getAccessToken());
+                .body(new AuthenticationResponse(tokenPair.getAccessToken()));
     }
 
     @PostMapping("refresh")
-    public String refreshAccessToken(HttpServletRequest httpServletRequest) {
+    public AuthenticationResponse refreshAccessToken(HttpServletRequest httpServletRequest) {
         final Cookie cookie = WebUtils.getCookie(httpServletRequest, AuthConstant.REFRESH_TOKEN_PREFIX);
-        if (cookie != null)
-            return authService.issueAccessToken(cookie.getValue());
-        else
+        if (cookie != null) {
+            final String accessToken = authService.issueAccessToken(cookie.getValue());
+            return new AuthenticationResponse(accessToken);
+        } else
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
 

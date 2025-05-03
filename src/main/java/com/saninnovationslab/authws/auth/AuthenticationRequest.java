@@ -1,10 +1,10 @@
 package com.saninnovationslab.authws.auth;
 
-public class AuthenticationRequestModel {
+public class AuthenticationRequest {
     private final String username;
     private final String password;
 
-    public AuthenticationRequestModel(String username, String password) {
+    public AuthenticationRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }

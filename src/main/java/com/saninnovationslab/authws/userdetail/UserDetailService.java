@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException; 
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserDetailService {
@@ -52,11 +52,12 @@ public class UserDetailService {
         return transform(userDetail);
     }
 
-    public void updateStatus(Integer id, UserStatus status) {
+    public UserBasicDetailModel updateStatus(Integer id, UserStatus status) {
         UserDetail userDetail = findById(id);
         userDetail.setStatus(status);
         userDetail.setLastUpdated(new Timestamp(System.currentTimeMillis()));
         userDetailRepository.save(userDetail);
+        return transform(userDetail);
     }
 
 }

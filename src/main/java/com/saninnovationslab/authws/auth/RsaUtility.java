@@ -20,11 +20,17 @@ import com.auth0.jwt.algorithms.Algorithm;
 @Service
 public class RsaUtility {
 
-    @Value(AuthConstant.PRIVATE_KEY_PATH)
-    Resource privateKeyResource;
+    @Value(AuthConstant.RT_PRIVATE_KEY_PATH)
+    Resource refreshTokenPrivateKey;
 
-    @Value(AuthConstant.PUBLIC_KEY_PATH)
-    Resource publicKeyResource;
+    @Value(AuthConstant.RT_PUBLIC_KEY_PATH)
+    Resource refreshTokenPublicKey;
+
+    @Value(AuthConstant.AT_PRIVATE_KEY_PATH)
+    Resource accessTokenPrivateKey;
+
+    @Value(AuthConstant.AT_PUBLIC_KEY_PATH)
+    Resource accessTokenPublicKey;
 
     private RSAPrivateKey readPKCS8PrivateKey(String key) throws GeneralSecurityException, IOException {
         String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----", "").replaceAll(System.lineSeparator(), "")
@@ -48,22 +54,31 @@ public class RsaUtility {
         return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    public Algorithm getEncryptionAlgorithm() {
+    public Algorithm getEncryptionAlgorithm(TokenType tokenType) {
         RSAPrivateKey rsaPrivateKey;
         RSAPublicKey rsaPublicKey;
         try {
-            rsaPrivateKey = readPKCS8PrivateKey(getKey(privateKeyResource.getInputStream()));
-            rsaPublicKey = readX509PublicKey(getKey(publicKeyResource.getInputStream()));
+            if (tokenType.equals(TokenType.REFRESH_TOKEN)) {
+                rsaPrivateKey = readPKCS8PrivateKey(getKey(refreshTokenPrivateKey.getInputStream()));
+                rsaPublicKey = readX509PublicKey(getKey(refreshTokenPublicKey.getInputStream()));
+            } else {
+                rsaPrivateKey = readPKCS8PrivateKey(getKey(accessTokenPrivateKey.getInputStream()));
+                rsaPublicKey = readX509PublicKey(getKey(accessTokenPublicKey.getInputStream()));
+            }
             return Algorithm.RSA256(rsaPublicKey, rsaPrivateKey);
         } catch (Exception ex) {
             throw new RuntimeException();
         }
     }
 
-    public Algorithm getDecryptionAlgorithm() {
+    public Algorithm getDecryptionAlgorithm(TokenType tokenType) {
         RSAPublicKey rsaPublicKey;
         try {
-            rsaPublicKey = readX509PublicKey(getKey(publicKeyResource.getInputStream()));
+            if (tokenType.equals(TokenType.REFRESH_TOKEN)) {
+                rsaPublicKey = readX509PublicKey(getKey(refreshTokenPublicKey.getInputStream()));
+            } else {
+                rsaPublicKey = readX509PublicKey(getKey(accessTokenPublicKey.getInputStream()));
+            }
             return Algorithm.RSA256(rsaPublicKey, null);
         } catch (Exception ex) {
             throw new RuntimeException();

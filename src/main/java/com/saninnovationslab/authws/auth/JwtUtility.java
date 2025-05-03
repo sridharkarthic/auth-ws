@@ -19,17 +19,17 @@ public class JwtUtility {
     @Autowired
     private RsaUtility rsaUtility;
 
-    public String generateToken(UserDetail userDetail, long expiry) throws JWTCreationException {
+    public String generateToken(UserDetail userDetail, long expiry, TokenType tokenType) throws JWTCreationException {
         return JWT.create().withIssuer(AuthConstant.JWT_ISSUER)
                 .withSubject(userDetail.getId().toString())
                 .withPayload(getPayload(userDetail))
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiry))
-                .sign(rsaUtility.getEncryptionAlgorithm());
+                .sign(rsaUtility.getEncryptionAlgorithm(tokenType));
     }
 
-    public DecodedJWT verifyToken(String token) throws JWTVerificationException {
-        return JWT.require(rsaUtility.getDecryptionAlgorithm()).withIssuer(AuthConstant.JWT_ISSUER).build()
+    public DecodedJWT verifyToken(String token, TokenType tokenType) throws JWTVerificationException {
+        return JWT.require(rsaUtility.getDecryptionAlgorithm(tokenType)).withIssuer(AuthConstant.JWT_ISSUER).build()
                 .verify(token);
     }
 
@@ -39,7 +39,7 @@ public class JwtUtility {
                 .withPayload(getPayload(decodedJWT))
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + AuthConstant.ACCESS_TOKEN_EXPIRY))
-                .sign(rsaUtility.getEncryptionAlgorithm());
+                .sign(rsaUtility.getEncryptionAlgorithm(TokenType.ACCESS_TOKEN));
     }
 
     private Map<String, String> getPayload(UserDetail userDetail) {
